@@ -1,4 +1,4 @@
-package com.libraryapp.dto;
+package com.libraryapp.dto.book;
 
 public record BookResponseDto(
         String id,

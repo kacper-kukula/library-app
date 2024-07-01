@@ -1,8 +1,8 @@
 package com.libraryapp.mapper;
 
 import com.libraryapp.config.MapperConfig;
-import com.libraryapp.dto.BookRequestDto;
-import com.libraryapp.dto.BookResponseDto;
+import com.libraryapp.dto.book.BookRequestDto;
+import com.libraryapp.dto.book.BookResponseDto;
 import com.libraryapp.model.Book;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

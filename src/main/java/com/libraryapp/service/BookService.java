@@ -1,7 +1,7 @@
 package com.libraryapp.service;
 
-import com.libraryapp.dto.BookRequestDto;
-import com.libraryapp.dto.BookResponseDto;
+import com.libraryapp.dto.book.BookRequestDto;
+import com.libraryapp.dto.book.BookResponseDto;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 
