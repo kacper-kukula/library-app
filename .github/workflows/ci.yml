@@ -5,6 +5,8 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET_STRING: ${{ secrets.JWT_SECRET_STRING }}
 
     steps:
       - uses: actions/checkout@v2
