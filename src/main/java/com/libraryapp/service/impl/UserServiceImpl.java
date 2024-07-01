@@ -44,7 +44,6 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto setRole(String id, UserRoleUpdateRequestDto request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
-
         user.setRole(request.role());
         User updatedUser = userRepository.save(user);
 
@@ -64,9 +63,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto updateProfile(UserUpdateRequestDto request) {
         User user = authenticationUtil.getCurrentUserFromDb();
-
-        user.setFirstName(request.firstName());
-        user.setLastName(request.lastName());
+        userMapper.updateLoanFromDto(user, request);
         User updatedUser = userRepository.save(user);
 
         return userMapper.toDto(updatedUser);

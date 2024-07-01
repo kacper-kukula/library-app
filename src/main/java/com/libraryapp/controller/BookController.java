@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,28 +28,33 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MANAGER')")
     public List<BookResponseDto> findAll(Pageable pageable) {
         return bookService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MANAGER')")
     public BookResponseDto findById(@PathVariable String id) {
         return bookService.findById(id);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     @ResponseStatus(HttpStatus.CREATED)
     public BookResponseDto createBook(@RequestBody @Valid BookRequestDto bookRequestDto) {
         return bookService.save(bookRequestDto);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<String> deleteById(@PathVariable String id) {
         bookService.deleteById(id);
         return ResponseEntity.ok("Book (ID: " + id + ") successfully deleted.");
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public BookResponseDto updateById(
             @PathVariable String id,
             @RequestBody @Valid BookRequestDto bookRequestDto) {

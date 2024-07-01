@@ -23,7 +23,6 @@ public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
 
     @Override
-    @Transactional
     public BookResponseDto save(BookRequestDto bookRequestDto) {
         Book book = bookMapper.toEntity(bookRequestDto);
         Book savedBook = bookRepository.save(book);
@@ -32,7 +31,6 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Transactional
     public List<BookResponseDto> findAll(Pageable pageable) {
         return bookRepository.findAll(pageable).stream()
                 .map(bookMapper::toDto)
@@ -40,7 +38,6 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Transactional
     public BookResponseDto findById(String id) {
         return bookRepository.findById(id)
                 .map(bookMapper::toDto)
@@ -53,7 +50,6 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Transactional
     public BookResponseDto updateById(String id, BookRequestDto bookRequestDto) {
         Book existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(BOOK_NOT_FOUND_ERROR + id));

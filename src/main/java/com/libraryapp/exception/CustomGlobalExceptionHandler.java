@@ -4,6 +4,7 @@ import com.libraryapp.exception.custom.BookAlreadyLoanedException;
 import com.libraryapp.exception.custom.EntityNotFoundException;
 import com.libraryapp.exception.custom.LoanAlreadyReturnedException;
 import com.libraryapp.exception.custom.RegistrationException;
+import com.libraryapp.exception.custom.UnauthorizedViewException;
 import io.jsonwebtoken.ExpiredJwtException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -92,6 +93,17 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 List.of(ex.getMessage()));
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedViewException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedViewException(
+            UnauthorizedViewException ex) {
+        ErrorResponse body = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN,
+                List.of(ex.getMessage()));
+
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
     private String getErrorMessage(ObjectError objectError) {
