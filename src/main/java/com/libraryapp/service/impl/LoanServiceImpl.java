@@ -7,6 +7,7 @@ import com.libraryapp.model.Book;
 import com.libraryapp.model.Loan;
 import com.libraryapp.repository.BookRepository;
 import com.libraryapp.repository.LoanRepository;
+import com.libraryapp.security.util.AuthenticationUtil;
 import com.libraryapp.service.LoanService;
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +26,7 @@ public class LoanServiceImpl implements LoanService {
     private final LoanRepository loanRepository;
     private final BookRepository bookRepository;
     private final LoanMapper loanMapper;
+    private final AuthenticationUtil authenticationUtil;
 
     @Override
     public List<LoanResponseDto> findAll(Pageable pageable) {
@@ -56,7 +58,7 @@ public class LoanServiceImpl implements LoanService {
 
         Loan loan = loanMapper.toEntity(loanRequestDto);
         loan.setBorrowedDate(LocalDate.now());
-        //TODO - Set User ID from spring security context
+        loan.setCustomerId(authenticationUtil.getCurrentUserFromDb().getId());
         Loan savedLoan = loanRepository.save(loan);
 
         return loanMapper.toDto(savedLoan);
