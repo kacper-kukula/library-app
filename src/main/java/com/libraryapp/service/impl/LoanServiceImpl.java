@@ -2,6 +2,9 @@ package com.libraryapp.service.impl;
 
 import com.libraryapp.dto.loan.LoanRequestDto;
 import com.libraryapp.dto.loan.LoanResponseDto;
+import com.libraryapp.exception.custom.BookAlreadyLoanedException;
+import com.libraryapp.exception.custom.EntityNotFoundException;
+import com.libraryapp.exception.custom.LoanAlreadyReturnedException;
 import com.libraryapp.mapper.LoanMapper;
 import com.libraryapp.model.Book;
 import com.libraryapp.model.Loan;
@@ -39,7 +42,7 @@ public class LoanServiceImpl implements LoanService {
     public LoanResponseDto findById(String id) {
         return loanRepository.findById(id)
                 .map(loanMapper::toDto)
-                .orElseThrow(() -> new RuntimeException(LOAN_NOT_FOUND_ERROR + id));
+                .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
     }
 
     @Override
@@ -47,13 +50,13 @@ public class LoanServiceImpl implements LoanService {
     public LoanResponseDto createLoan(LoanRequestDto loanRequestDto) {
         String bookId = loanRequestDto.bookId();
         Book bookToLoan = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException(BOOK_NOT_FOUND_ERROR + bookId));
+                .orElseThrow(() -> new EntityNotFoundException(BOOK_NOT_FOUND_ERROR + bookId));
 
-        if (bookToLoan.isBorrowed()) {
-            throw new RuntimeException("This book is already loaned by someone else.");
+        if (bookToLoan.getIsBorrowed()) {
+            throw new BookAlreadyLoanedException("This book is already loaned.");
         }
 
-        bookToLoan.setBorrowed(true);
+        bookToLoan.setIsBorrowed(true);
         bookRepository.save(bookToLoan);
 
         Loan loan = loanMapper.toEntity(loanRequestDto);
@@ -68,18 +71,18 @@ public class LoanServiceImpl implements LoanService {
     @Transactional
     public LoanResponseDto returnLoan(String id) {
         Loan existingLoan = loanRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(LOAN_NOT_FOUND_ERROR + id));
+                .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
 
         if (existingLoan.getReturnedDate() != null) {
-            throw new RuntimeException("This loan has already been returned.");
+            throw new LoanAlreadyReturnedException("This loan has already been returned.");
         }
 
         existingLoan.setReturnedDate(LocalDate.now());
 
         String bookId = existingLoan.getBookId();
         Book loanedBook = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException(BOOK_NOT_FOUND_ERROR + bookId));
-        loanedBook.setBorrowed(false);
+                .orElseThrow(() -> new EntityNotFoundException(BOOK_NOT_FOUND_ERROR + bookId));
+        loanedBook.setIsBorrowed(false);
 
         Loan savedLoan = loanRepository.save(existingLoan);
         bookRepository.save(loanedBook);
@@ -95,7 +98,7 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public LoanResponseDto updateById(String id, LoanRequestDto loanRequestDto) {
         Loan existingLoan = loanRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(LOAN_NOT_FOUND_ERROR + id));
+                .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
 
         loanMapper.updateLoanFromDto(existingLoan, loanRequestDto);
         loanRepository.save(existingLoan);

@@ -1,6 +1,8 @@
 package com.libraryapp.exception;
 
+import com.libraryapp.exception.custom.BookAlreadyLoanedException;
 import com.libraryapp.exception.custom.EntityNotFoundException;
+import com.libraryapp.exception.custom.LoanAlreadyReturnedException;
 import com.libraryapp.exception.custom.RegistrationException;
 import io.jsonwebtoken.ExpiredJwtException;
 import java.time.LocalDateTime;
@@ -47,6 +49,28 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 List.of(ex.getMessage()));
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BookAlreadyLoanedException.class)
+    public ResponseEntity<ErrorResponse> handleBookAlreadyLoanedException(
+            BookAlreadyLoanedException ex) {
+        ErrorResponse body = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST,
+                List.of(ex.getMessage()));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(LoanAlreadyReturnedException.class)
+    public ResponseEntity<ErrorResponse> handleLoanAlreadyReturnedException(
+            LoanAlreadyReturnedException ex) {
+        ErrorResponse body = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST,
+                List.of(ex.getMessage()));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(RegistrationException.class)
