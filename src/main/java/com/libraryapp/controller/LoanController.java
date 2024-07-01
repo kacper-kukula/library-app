@@ -1,8 +1,8 @@
 package com.libraryapp.controller;
 
-import com.libraryapp.dto.book.BookRequestDto;
-import com.libraryapp.dto.book.BookResponseDto;
-import com.libraryapp.service.BookService;
+import com.libraryapp.dto.loan.LoanRequestDto;
+import com.libraryapp.dto.loan.LoanResponseDto;
+import com.libraryapp.service.LoanService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,36 +20,41 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/books")
-public class BookController {
+@RequestMapping(value = "/loans")
+public class LoanController {
 
-    private final BookService bookService;
+    private final LoanService loanService;
 
     @GetMapping
-    public List<BookResponseDto> findAll(Pageable pageable) {
-        return bookService.findAll(pageable);
+    public List<LoanResponseDto> findAll(Pageable pageable) {
+        return loanService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
-    public BookResponseDto findById(@PathVariable String id) {
-        return bookService.findById(id);
+    public LoanResponseDto findById(@PathVariable String id) {
+        return loanService.findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookResponseDto createBook(@RequestBody @Valid BookRequestDto bookRequestDto) {
-        return bookService.save(bookRequestDto);
+    public LoanResponseDto createLoan(@RequestBody @Valid LoanRequestDto loanRequestDto) {
+        return loanService.createLoan(loanRequestDto);
+    }
+
+    @PutMapping("/{id}/return")
+    public LoanResponseDto returnLoan(@PathVariable String id) {
+        return loanService.returnLoan(id);
     }
 
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable String id) {
-        bookService.deleteById(id);
+        loanService.deleteById(id);
     }
 
     @PutMapping("/{id}")
-    public BookResponseDto updateById(
+    public LoanResponseDto updateById(
             @PathVariable String id,
-            @RequestBody @Valid BookRequestDto bookRequestDto) {
-        return bookService.updateById(id, bookRequestDto);
+            @RequestBody @Valid LoanRequestDto loanRequestDto) {
+        return loanService.updateById(id, loanRequestDto);
     }
 }

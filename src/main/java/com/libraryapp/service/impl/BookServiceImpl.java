@@ -1,7 +1,7 @@
 package com.libraryapp.service.impl;
 
-import com.libraryapp.dto.BookRequestDto;
-import com.libraryapp.dto.BookResponseDto;
+import com.libraryapp.dto.book.BookRequestDto;
+import com.libraryapp.dto.book.BookResponseDto;
 import com.libraryapp.mapper.BookMapper;
 import com.libraryapp.model.Book;
 import com.libraryapp.repository.BookRepository;
