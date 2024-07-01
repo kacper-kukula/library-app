@@ -5,6 +5,6 @@ public record BookResponseDto(
         String title,
         String author,
         String category,
-        boolean isBorrowed
+        Boolean isBorrowed
 ) {
 }

@@ -2,6 +2,10 @@ package com.libraryapp.service.impl;
 
 import com.libraryapp.dto.loan.LoanRequestDto;
 import com.libraryapp.dto.loan.LoanResponseDto;
+import com.libraryapp.exception.custom.BookAlreadyLoanedException;
+import com.libraryapp.exception.custom.EntityNotFoundException;
+import com.libraryapp.exception.custom.LoanAlreadyReturnedException;
+import com.libraryapp.exception.custom.UnauthorizedViewException;
 import com.libraryapp.mapper.LoanMapper;
 import com.libraryapp.model.Book;
 import com.libraryapp.model.Loan;
@@ -14,7 +18,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,30 +33,43 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public List<LoanResponseDto> findAll(Pageable pageable) {
-        return loanRepository.findAll(pageable).stream()
+        // Manager will see all loans
+        if (authenticationUtil.isManager()) {
+            return loanRepository.findAll(pageable).stream()
+                    .map(loanMapper::toDto)
+                    .toList();
+        }
+
+        // Customer will only see his loans
+        return loanRepository
+                .findAllByCustomerId(authenticationUtil.getCurrentUserFromDb().getId()).stream()
                 .map(loanMapper::toDto)
                 .toList();
     }
 
     @Override
     public LoanResponseDto findById(String id) {
-        return loanRepository.findById(id)
-                .map(loanMapper::toDto)
-                .orElseThrow(() -> new RuntimeException(LOAN_NOT_FOUND_ERROR + id));
+        Loan loan = loanRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
+
+        if (!authenticationUtil.isManager()) {
+            validateCurrentUserOwnsLoan(loan);
+        }
+
+        return loanMapper.toDto(loan);
     }
 
     @Override
-    @Transactional
     public LoanResponseDto createLoan(LoanRequestDto loanRequestDto) {
         String bookId = loanRequestDto.bookId();
         Book bookToLoan = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException(BOOK_NOT_FOUND_ERROR + bookId));
+                .orElseThrow(() -> new EntityNotFoundException(BOOK_NOT_FOUND_ERROR + bookId));
 
-        if (bookToLoan.isBorrowed()) {
-            throw new RuntimeException("This book is already loaned by someone else.");
+        if (bookToLoan.getIsBorrowed()) {
+            throw new BookAlreadyLoanedException("This book is already loaned.");
         }
 
-        bookToLoan.setBorrowed(true);
+        bookToLoan.setIsBorrowed(true);
         bookRepository.save(bookToLoan);
 
         Loan loan = loanMapper.toEntity(loanRequestDto);
@@ -65,21 +81,20 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    @Transactional
     public LoanResponseDto returnLoan(String id) {
         Loan existingLoan = loanRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(LOAN_NOT_FOUND_ERROR + id));
+                .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
 
         if (existingLoan.getReturnedDate() != null) {
-            throw new RuntimeException("This loan has already been returned.");
+            throw new LoanAlreadyReturnedException("This loan has already been returned.");
         }
 
         existingLoan.setReturnedDate(LocalDate.now());
 
         String bookId = existingLoan.getBookId();
         Book loanedBook = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException(BOOK_NOT_FOUND_ERROR + bookId));
-        loanedBook.setBorrowed(false);
+                .orElseThrow(() -> new EntityNotFoundException(BOOK_NOT_FOUND_ERROR + bookId));
+        loanedBook.setIsBorrowed(false);
 
         Loan savedLoan = loanRepository.save(existingLoan);
         bookRepository.save(loanedBook);
@@ -95,11 +110,19 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public LoanResponseDto updateById(String id, LoanRequestDto loanRequestDto) {
         Loan existingLoan = loanRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(LOAN_NOT_FOUND_ERROR + id));
+                .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
 
         loanMapper.updateLoanFromDto(existingLoan, loanRequestDto);
         loanRepository.save(existingLoan);
 
         return loanMapper.toDto(existingLoan);
+    }
+
+    private void validateCurrentUserOwnsLoan(Loan loan) {
+        String loanOwnerId = loan.getCustomerId();
+
+        if (!loanOwnerId.equals(authenticationUtil.getCurrentUserFromDb().getId())) {
+            throw new UnauthorizedViewException("You are not authorized to view this loan.");
+        }
     }
 }
