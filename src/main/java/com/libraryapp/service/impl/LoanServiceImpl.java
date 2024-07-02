@@ -15,7 +15,9 @@ import com.libraryapp.security.util.AuthenticationUtil;
 import com.libraryapp.service.LoanService;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,23 +35,26 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public List<LoanResponseDto> findAll(Pageable pageable) {
-        // Manager will see all loans
+        Page<Loan> loansPage;
+
+        // Manager will see all non-deleted loans
         if (authenticationUtil.isManager()) {
-            return loanRepository.findAll(pageable).stream()
-                    .map(loanMapper::toDto)
-                    .toList();
+            loansPage = loanRepository.findAllByIsDeletedFalse(pageable);
+        } else {
+            // Customer will only see his non-deleted loans
+            loansPage = loanRepository.findAllByCustomerIdAndIsDeletedFalse(
+                    authenticationUtil.getCurrentUserFromDb().getId(), pageable);
         }
 
-        // Customer will only see his loans
-        return loanRepository
-                .findAllByCustomerId(authenticationUtil.getCurrentUserFromDb().getId()).stream()
+        return loansPage.stream()
                 .map(loanMapper::toDto)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
     public LoanResponseDto findById(String id) {
         Loan loan = loanRepository.findById(id)
+                .filter(l -> !l.getIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
 
         if (!authenticationUtil.isManager()) {
@@ -83,6 +88,7 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public LoanResponseDto returnLoan(String id) {
         Loan existingLoan = loanRepository.findById(id)
+                .filter(loan -> !loan.getIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
 
         if (existingLoan.getReturnedDate() != null) {
@@ -104,12 +110,17 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public void deleteById(String id) {
-        loanRepository.deleteById(id);
+        Loan loan = loanRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
+        loan.setIsDeleted(true); // soft delete
+
+        loanRepository.save(loan);
     }
 
     @Override
     public LoanResponseDto updateById(String id, LoanRequestDto loanRequestDto) {
         Loan existingLoan = loanRepository.findById(id)
+                .filter(loan -> !loan.getIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException(LOAN_NOT_FOUND_ERROR + id));
 
         loanMapper.updateLoanFromDto(existingLoan, loanRequestDto);

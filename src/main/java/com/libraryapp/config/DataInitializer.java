@@ -25,25 +25,25 @@ public class DataInitializer {
             // Add sample books and a manager account only if database is empty
             List<Book> books = List.of(
                     Book.builder().title("Dune").author("F. Herbert")
-                            .category("Sci-Fi").isBorrowed(false).build(),
+                            .category("Sci-Fi").isBorrowed(false).isDeleted(false).build(),
                     Book.builder().title("It").author("S. King")
-                            .category("Horror").isBorrowed(false).build(),
+                            .category("Horror").isBorrowed(false).isDeleted(false).build(),
                     Book.builder().title("Murder").author("A. Christie")
-                            .category("Mystery").isBorrowed(false).build(),
+                            .category("Mystery").isBorrowed(false).isDeleted(false).build(),
                     Book.builder().title("Fahrenheit 451").author("R. Bradbury")
-                            .category("Dystopian").isBorrowed(false).build(),
+                            .category("Dystopian").isBorrowed(false).isDeleted(false).build(),
                     Book.builder().title("Brave New World").author("A. Huxley")
-                            .category("Sci-Fi").isBorrowed(false).build(),
+                            .category("Sci-Fi").isBorrowed(false).isDeleted(false).build(),
                     Book.builder().title("Emma").author("J. Austen")
-                            .category("Classic").isBorrowed(false).build(),
+                            .category("Classic").isBorrowed(false).isDeleted(false).build(),
                     Book.builder().title("Pride and Prejudice").author("J. Austen")
-                            .category("Classic").isBorrowed(false).build(),
+                            .category("Classic").isBorrowed(false).isDeleted(false).build(),
                     Book.builder().title("Dracula").author("B. Stoker")
-                            .category("Horror").isBorrowed(false).build(),
+                            .category("Horror").isBorrowed(false).isDeleted(false).build(),
                     Book.builder().title("Neuromancer").author("W. Gibson")
-                            .category("Sci-Fi").isBorrowed(false).build(),
+                            .category("Sci-Fi").isBorrowed(false).isDeleted(false).build(),
                     Book.builder().title("The Hobbit").author("J.R.R. Tolkien")
-                            .category("Fantasy").isBorrowed(false).build()
+                            .category("Fantasy").isBorrowed(false).isDeleted(false).build()
             );
 
             if (bookRepository.count() == 0) {

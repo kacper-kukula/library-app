@@ -15,4 +15,5 @@ public class Loan {
     private String customerId;
     private LocalDate borrowedDate;
     private LocalDate returnedDate;
+    private Boolean isDeleted = false;
 }

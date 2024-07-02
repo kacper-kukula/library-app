@@ -31,7 +31,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookResponseDto> findAll(Pageable pageable) {
-        return bookRepository.findAll(pageable).stream()
+        return bookRepository.findAllByIsDeletedFalse(pageable).stream()
                 .map(bookMapper::toDto)
                 .toList();
     }
@@ -39,18 +39,24 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookResponseDto findById(String id) {
         return bookRepository.findById(id)
+                .filter(book -> !book.getIsDeleted())
                 .map(bookMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(BOOK_NOT_FOUND_ERROR + id));
     }
 
     @Override
     public void deleteById(String id) {
-        bookRepository.deleteById(id);
+        Book existingBook = bookRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(BOOK_NOT_FOUND_ERROR + id));
+        existingBook.setIsDeleted(true); // Soft delete
+
+        bookRepository.save(existingBook);
     }
 
     @Override
     public BookResponseDto updateById(String id, BookRequestDto bookRequestDto) {
         Book existingBook = bookRepository.findById(id)
+                .filter(book -> !book.getIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException(BOOK_NOT_FOUND_ERROR + id));
 
         bookMapper.updateBookFromDto(existingBook, bookRequestDto);

@@ -22,6 +22,7 @@ public class User implements UserDetails {
     private String firstName;
     private String lastName;
     private Role role = Role.CUSTOMER; // Default role
+    private Boolean isDeleted = false;
 
     public enum Role {
         MANAGER,
@@ -45,21 +46,21 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return !isDeleted;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !isDeleted;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return !isDeleted;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return !isDeleted;
     }
 }

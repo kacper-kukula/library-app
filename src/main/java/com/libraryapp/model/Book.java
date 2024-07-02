@@ -16,4 +16,5 @@ public class Book {
     private String author;
     private String category;
     private Boolean isBorrowed = false;
+    private Boolean isDeleted = false;
 }
