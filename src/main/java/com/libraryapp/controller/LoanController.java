@@ -3,6 +3,8 @@ package com.libraryapp.controller;
 import com.libraryapp.dto.loan.LoanRequestDto;
 import com.libraryapp.dto.loan.LoanResponseDto;
 import com.libraryapp.service.LoanService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Loan Management",
+        description = "Endpoints for managing loans.")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/loans")
@@ -27,18 +31,24 @@ public class LoanController {
 
     private final LoanService loanService;
 
+    @Operation(summary = "Get all loans",
+            description = "Retrieve a paginated list of all loans.")
     @GetMapping
     @PreAuthorize("hasAnyRole('CUSTOMER', 'MANAGER')")
     public List<LoanResponseDto> findAll(Pageable pageable) {
         return loanService.findAll(pageable);
     }
 
+    @Operation(summary = "Get loan by ID",
+            description = "Retrieve the details of a specific loan by its ID.")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'MANAGER')")
     public LoanResponseDto findById(@PathVariable String id) {
         return loanService.findById(id);
     }
 
+    @Operation(summary = "Create loan",
+            description = "Create a new loan of a specific book ID.")
     @PostMapping
     @PreAuthorize("hasRole('CUSTOMER')")
     @ResponseStatus(HttpStatus.CREATED)
@@ -46,12 +56,16 @@ public class LoanController {
         return loanService.createLoan(loanRequestDto);
     }
 
+    @Operation(summary = "Return loan",
+            description = "Mark a loan as returned.")
     @PutMapping("/{id}/return")
     @PreAuthorize("hasRole('CUSTOMER')")
     public LoanResponseDto returnLoan(@PathVariable String id) {
         return loanService.returnLoan(id);
     }
 
+    @Operation(summary = "Soft delete loan",
+            description = "Soft delete a loan by ID. Can be performed only by a manager.")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<String> deleteById(@PathVariable String id) {
@@ -59,6 +73,8 @@ public class LoanController {
         return ResponseEntity.ok("Loan (ID: " + id + ") successfully deleted.");
     }
 
+    @Operation(summary = "Update loan",
+            description = "Update loan details by ID. Can be performed only by a manager.")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public LoanResponseDto updateById(

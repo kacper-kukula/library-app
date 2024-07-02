@@ -92,7 +92,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 HttpStatus.UNAUTHORIZED,
                 List.of(ex.getMessage()));
 
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(UnauthorizedViewException.class)
