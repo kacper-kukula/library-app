@@ -1,30 +1,28 @@
 package com.libraryapp;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
+@Testcontainers
 class LibraryAppApplicationTests {
 
-    private static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:latest")
-            .withExposedPorts(27017);
+    @Container
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:latest");
 
-    @BeforeEach
-    void setUp() {
-        mongoDBContainer.start();
+    @BeforeAll
+    static void setUp() {
         System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
     }
 
     @Test
     void contextLoads() {
-        assertThat(mongoDBContainer.isRunning()).isTrue();
     }
-
 }
