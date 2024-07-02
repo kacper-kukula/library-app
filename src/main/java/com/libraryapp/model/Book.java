@@ -1,10 +1,12 @@
 package com.libraryapp.model;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
+@Builder
 @Document(collection = "books")
 public class Book {
 
@@ -13,5 +15,5 @@ public class Book {
     private String title;
     private String author;
     private String category;
-    private Boolean isBorrowed;
+    private Boolean isBorrowed = false;
 }

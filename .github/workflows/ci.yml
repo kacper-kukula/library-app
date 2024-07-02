@@ -8,13 +8,28 @@ jobs:
     env:
       JWT_SECRET_STRING: ${{ secrets.JWT_SECRET_STRING }}
 
+    services:
+      docker:
+        image: docker:20.10.7
+        options: --privileged
+        ports:
+          - 27017:27017
+
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
+      - name: Ensure Docker is running
+        run: |
+          docker version
+          sudo systemctl start docker
+          sudo systemctl enable docker
+
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify
