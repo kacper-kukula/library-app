@@ -52,18 +52,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getProfile() {
-        return userMapper.toDto(authenticationUtil.getCurrentUserFromDb());
+        User user = authenticationUtil.getCurrentUserFromDb();
+        if (user.getIsDeleted()) {
+            throw new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE);
+        }
+
+        return userMapper.toDto(user);
     }
 
     @Override
     public void deleteById(String id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
+        user.setIsDeleted(true); // Soft delete
+
+        userRepository.save(user);
     }
 
     @Override
     public UserResponseDto updateProfile(UserUpdateRequestDto request) {
         User user = authenticationUtil.getCurrentUserFromDb();
-        userMapper.updateLoanFromDto(user, request);
+        if (user.getIsDeleted()) {
+            throw new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE);
+        }
+        userMapper.updateUserFromDto(user, request);
         User updatedUser = userRepository.save(user);
 
         return userMapper.toDto(updatedUser);

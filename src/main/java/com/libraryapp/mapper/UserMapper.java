@@ -15,5 +15,5 @@ public interface UserMapper {
 
     User toEntity(UserRegistrationRequestDto requestDto);
 
-    void updateLoanFromDto(@MappingTarget User user, UserUpdateRequestDto dto);
+    void updateUserFromDto(@MappingTarget User user, UserUpdateRequestDto dto);
 }
