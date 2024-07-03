@@ -40,36 +40,34 @@ public class UserRepositoryTest {
     }
 
     @Test
-    void testSaveAndFindUserByEmail() {
+    void findByEmail_ValidUserEmail_ReturnsUser() {
         // Given
-        User user = new User();
-        user.setEmail("test@example.com");
-        user.setPassword("password123");
-        user.setFirstName("John");
-        user.setLastName("Doe");
-        user.setRole(User.Role.CUSTOMER);
-        user.setIsDeleted(false);
+        User expectedUser = new User();
+        expectedUser.setEmail("test@example.com");
+        expectedUser.setPassword("password123");
+        expectedUser.setFirstName("John");
+        expectedUser.setLastName("Doe");
+        expectedUser.setRole(User.Role.CUSTOMER);
+        expectedUser.setIsDeleted(false);
 
         // When
-        userRepository.save(user);
-        Optional<User> foundUser = userRepository.findByEmail("test@example.com");
+        userRepository.save(expectedUser);
+        Optional<User> actual = userRepository.findByEmail("test@example.com");
 
         // Then
-        assertTrue(foundUser.isPresent(), "User should be present");
-        assertEquals("John", foundUser.get().getFirstName(), "User first name should match");
-        assertEquals("Doe", foundUser.get().getLastName(), "User last name should match");
-        assertEquals(User.Role.CUSTOMER, foundUser.get().getRole(), "User role should match");
+        assertTrue(actual.isPresent(), "User should be present");
+        assertEquals(actual.get(), expectedUser, "User should be the same");
     }
 
     @Test
-    void testFindByEmail_NotFound() {
+    void findByEmail_InvalidUserEmail_ReturnsEmptyOptional() {
         // Given
         String nonExistentEmail = "invalid@example.com";
 
         // When
-        Optional<User> foundUser = userRepository.findByEmail(nonExistentEmail);
+        Optional<User> actual = userRepository.findByEmail(nonExistentEmail);
 
         // Then
-        assertFalse(foundUser.isPresent(), "User should not be present");
+        assertFalse(actual.isPresent(), "User should not be present");
     }
 }
