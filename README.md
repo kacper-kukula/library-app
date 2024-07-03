@@ -91,4 +91,4 @@ You can now access the endpoints using `Swagger` or `Postman`. To access the fun
     "password": "safePassword"
 }
 ```
-After logging in, you receive a `Bearer Token` which you must then provide as authorization to access the endpoints.
+After logging in, you receive a `Bearer Token` which you must then provide as authorization to access the endpoints. The database is initialized with 10 sample books and a manager account.
